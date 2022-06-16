@@ -130,7 +130,7 @@ class csPCaAlgorithm(SegmentationAlgorithm):
             "--output", str(self.nndet_out_dir),
         ]
 
-        subprocess.run(cmd, check=True)
+        subprocess.check_call(cmd)
 
         # save prediction to output folder
         detection_map = sitk.ReadImage(str(self.nndet_out_dir / "scan_detection_map.nii.gz"))
@@ -160,7 +160,7 @@ class csPCaAlgorithm(SegmentationAlgorithm):
             '--results', '/workdir/algorithm/results/nnDet'
         ]
 
-        subprocess.check_call(cmd, check=True)
+        subprocess.check_call(cmd)
 
 
 if __name__ == "__main__":

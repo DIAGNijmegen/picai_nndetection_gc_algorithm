@@ -11,7 +11,7 @@ docker volume create $DOCKER_FILE_SHARE
 # you can see your output (to debug what's going on) by specifying a path instead:
 # DOCKER_FILE_SHARE="/mnt/netcache/pelvis/projects/joeran/tmp-docker-volume"
 
-docker run --rm \
+docker run --rm --gpus='"device=4"' \
         -v $SCRIPTPATH/test/:/input/ \
         -v $DOCKER_FILE_SHARE:/output/ \
         picai_baseline_nndetection_processor
