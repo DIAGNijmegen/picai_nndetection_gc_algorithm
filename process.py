@@ -152,12 +152,12 @@ class csPCaAlgorithm(SegmentationAlgorithm):
         cmd = [
             'nndet', 'predict', task,
             model,
-            '/workdir',
+            '/opt/algorithm',
             '--fold', fold,
             '--check',
             '--input', str(self.nndet_inp_dir),
             '--output', str(self.nndet_out_dir),
-            '--results', '/workdir/algorithm/results/nnDet'
+            '--results', '/opt/algorithm/results/nnDet'
         ]
 
         subprocess.check_call(cmd)
