@@ -42,6 +42,11 @@ class MultipleScansSameSequencesError(Exception):
         super.__init__(message)
 
 
+def strip_metadata(img: sitk.Image) -> None:
+    for key in img.GetMetaDataKeys():
+        img.EraseMetaData(key)
+
+
 class csPCaAlgorithm(SegmentationAlgorithm):
     """
     Wrapper to deploy trained baseline nnDetection model from
@@ -110,16 +115,22 @@ class csPCaAlgorithm(SegmentationAlgorithm):
             atomic_image_write(scan, path)
 
     # Note: need to overwrite process because of flexible inputs, which requires custom data loading
-    def process(self):
+    def process(self, task="Task2201_picai_baseline"):
         """
         Load bpMRI scans and generate detection map for clinically significant prostate cancer
         """
         # perform preprocessing
         self.preprocess_input()
 
+        # move dataset.json
+        path_src = Path(f"/opt/algorithm/results/nnDet/{task}/dataset.json")
+        path_dst = Path(f"/opt/algorithm/nnDet_raw_data/{task}/dataset.json")
+        path_dst.parent.mkdir(exist_ok=True, parents=True)
+        path_src.rename(path_dst)
+
         # perform inference using nnDetection
         self.predict(
-            task="Task2201_picai_baseline",
+            task=task,
         )
 
         # convert boxes to detection map
@@ -132,8 +143,13 @@ class csPCaAlgorithm(SegmentationAlgorithm):
 
         subprocess.check_call(cmd)
 
-        # save prediction to output folder
+        # read detection map
         detection_map = sitk.ReadImage(str(self.nndet_out_dir / "scan_detection_map.nii.gz"))
+
+        # remove metadata to get rid of SimpleITK warning
+        strip_metadata(detection_map)
+
+        # write detection map to output directory
         atomic_image_write(detection_map, self.cspca_detection_map_path)
 
         # save case-level likelihood
@@ -150,14 +166,13 @@ class csPCaAlgorithm(SegmentationAlgorithm):
 
         # Run prediction script
         cmd = [
-            'nndet', 'predict', task,
-            model,
-            '/opt/algorithm',
-            '--fold', fold,
-            '--check',
+            'nndet', 'predict', task, model,
+            '/opt/algorithm',  # workdir, should contain the nnDet_raw_data folder.
+            '--results', '/opt/algorithm/results/nnDet',
             '--input', str(self.nndet_inp_dir),
             '--output', str(self.nndet_out_dir),
-            '--results', '/opt/algorithm/results/nnDet'
+            '--fold', fold,  # use -1 for consolidated (ensemble of cross-validation models)
+            '--check',
         ]
 
         subprocess.check_call(cmd)

@@ -1,9 +1,9 @@
-FROM joeranbosma/picai_nndetection:latest
+FROM joeranbosma/picai_nndetection:1.3
 
 RUN groupadd -r algorithm && useradd -m --no-log-init -r -g algorithm algorithm
 
-RUN mkdir -p /opt/algorithm /input /output \
-    && chown algorithm:algorithm /opt/algorithm /input /output
+RUN mkdir -p /opt/algorithm /input /output /home/user/data \
+    && chown algorithm:algorithm /opt/algorithm /input /output /home/user/data
 
 USER algorithm
 
