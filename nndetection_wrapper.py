@@ -1,4 +1,4 @@
-#! /usr/bin/python3.real
+#! /usr/bin/python3
 # Adapted from https://github.com/DIAGNijmegen/diag-nnunet/blob/master/nnunet_wrapper.py
 import argparse
 import functools
