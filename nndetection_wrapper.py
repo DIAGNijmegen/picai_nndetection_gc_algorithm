@@ -1,4 +1,3 @@
-#!/opt/conda/bin/python
 # Adapted from https://github.com/DIAGNijmegen/diag-nnunet/blob/master/nnunet_wrapper.py
 import argparse
 import functools
