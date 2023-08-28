@@ -18,7 +18,7 @@ from nndet.io import get_training_dir
 from scripts.consolidate import main as _consolidate
 from scripts.predict import main as _predict
 
-import shutil_sol
+import shutil
 
 # add a flush to each print statement to ensure the stuff gets logged on SOL
 print = functools.partial(print, flush=True)
@@ -83,8 +83,8 @@ def copy_preprocessed_data_to_compute_node(task: str, remote_data_dir: Pathlike,
     # Copy preprocessed data to compute node
     print('[#] Copying plans and preprocessed data from storage server to compute node')
     local_task_dir.mkdir(parents=True, exist_ok=True)
-    shutil_sol.copyfile(remote_task_dir / "dataset.json", local_task_dir / "dataset.json")
-    shutil_sol.copytree(remote_task_dir / 'preprocessed', local_task_dir / 'preprocessed')
+    shutil.copyfile(remote_task_dir / "dataset.json", local_task_dir / "dataset.json")
+    shutil.copytree(remote_task_dir / 'preprocessed', local_task_dir / 'preprocessed')
 
     # Replace split with custom split?
     if custom_split:
@@ -186,7 +186,7 @@ def nndet_prep_train(argv):
         # Copy split file since that is for sure available now (nnUNet_train has created
         # it the file did not exist already - unless training with "all", so still check)
         if splits_filepath.exists():
-            shutil_sol.copyfile(splits_filepath, remote_task_prep_dir)
+            shutil.copyfile(splits_filepath, remote_task_prep_dir)
 
 
 def prepare_argv_for_nndet(argv, workdir=None):
@@ -264,18 +264,18 @@ def nndet_predict(argv):
     # copy dataset.json
     local_task_dir = Path(os.environ['det_data']) / args.task
     local_task_dir.mkdir(parents=True, exist_ok=True)
-    shutil_sol.copyfile(
+    shutil.copyfile(
         src=Path(args.workdir) / "nnDet_raw_data" / args.task / "dataset.json",
         dst=local_task_dir / "dataset.json"
     )
 
     # copy raw cases
     local_dir_input = Path(os.environ['det_data']) / args.task / "raw_splitted/imagesTs"
-    shutil_sol.copytree(args.input, local_dir_input)
+    shutil.copytree(args.input, local_dir_input)
 
     if args.skip_consolidate:
         print("[#] Copying plan.pkl to plan_inference.pkl. This is not removed afterwards! I think this uses model_best + model_last.")
-        shutil_sol.copyfile(training_dir / "plan.pkl", training_dir / "plan_inference.pkl")
+        shutil.copyfile(training_dir / "plan.pkl", training_dir / "plan_inference.pkl")
 
     # run prediction script with remaining arguments (including taskid)
     argv = prepare_argv_for_nndet(argv, workdir=args.workdir)
